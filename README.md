@@ -59,3 +59,8 @@ Encode XML special  characters by using simple C code
     encode: &amp;amp;&amp;amp;&amp;&quot;&lt;&amp;apos;&gt;&gt;&gt;&lt;
 
     decode: &amp;&amp;&"<&apos;>>><
+
+
+#### 5. unit test by googletest
+
+please reference code under test/ and [test/README.md](https://github.com/melody26613/xml-encode-by-C/blob/master/test/README.md)
