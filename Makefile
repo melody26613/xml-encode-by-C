@@ -1,7 +1,8 @@
-OBJS   := xml_encode.o
-EXE    := xml_encode
-CFLAGS := -g -std=c99
 CC     := gcc
+
+OBJS   := xml_encode.o sample.o
+EXE    := sample
+CFLAGS := -g -std=c99
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(EXE)

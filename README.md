@@ -26,7 +26,7 @@ Encode XML special  characters by using simple C code
 
 #### 4. use xml_encode, example:
 
-    ./xml_encode "&'\"<>"
+    ./sample "&'\"<>"
 
     result
 
@@ -38,7 +38,7 @@ Encode XML special  characters by using simple C code
 
 
 
-    ./xml_encode "&&&''\"<>>><"
+    ./sample "&&&''\"<>>><"
 
     result
 
@@ -50,7 +50,7 @@ Encode XML special  characters by using simple C code
 
 
 
-    ./xml_encode "&amp;&amp;&\"<&apos;>>><"
+    ./sample "&amp;&amp;&\"<&apos;>>><"
 
     result: 
 

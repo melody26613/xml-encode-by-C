@@ -1,15 +1,14 @@
 #include <errno.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define ARGV_INPUT_STR 1
+#include "xml_encode.h"
 
 #define XML_SPECIAL_CHARS_NUM 5
-#define MAX_XML_ENTITY_LEN 6 //strlen("&apos;") or strlen("&quot;")
-
-#define MAX_XML_ENTITY_BUFFER_LEN (MAX_XML_ENTITY_LEN + 1)
+#define MAX_XML_ENTITY_LEN 6 // strlen("&apos;") or strlen("&quot;")
 
 static const char xml_special_chars[XML_SPECIAL_CHARS_NUM] = {
     '&',
@@ -27,38 +26,46 @@ static const char *xml_encode_entities[XML_SPECIAL_CHARS_NUM] = {
     "&gt;"
 };
 
-int CountSpecialCharacters(char *str);
-char *XmlEncode(char *str);
-void XmlDecode(char *str);
+static int count_special_characters(const char *str);
 
-int main(int argc, char *argv[]){
-    if(argv[ARGV_INPUT_STR] == NULL){
-        printf("usage: ./xml_encode \"input string\"\n");
-        exit(-1);
+
+char *xml_encode(const char *str) {
+    int special_chars_count = count_special_characters(str);
+    int max_encode_len = (strlen(str) + special_chars_count * MAX_XML_ENTITY_LEN) + 1;
+    char *encode_str = (char*) calloc(max_encode_len, sizeof(char));
+    int encode_index = 0;
+
+    if (encode_str == NULL) {
+        perror("xml_encode() calloc()");
+        return NULL;
     }
 
-    /*demo XmlEncode and XmlDecode*/
-    char *str = argv[ARGV_INPUT_STR];
-    printf("input str: %s\n", str);
+    for (int i = 0; str[i] != '\0'; i++) {
+        bool encoded = false;
 
-    char *str_encode = XmlEncode(str);
-    if(str_encode == NULL){
-        exit(-1);
+        for (int j = 0; j < XML_SPECIAL_CHARS_NUM; j++) {
+            if (str[i] == xml_special_chars[j]) {
+                int special_chars_len = strlen(xml_encode_entities[j]);
+                strncat(encode_str, xml_encode_entities[j], special_chars_len);
+
+                encode_index += special_chars_len;
+                encoded = true;
+                break;
+            }
+        }
+        if (!encoded) {
+            encode_str[encode_index++] = str[i];
+        }
     }
-    printf("encode: %s\n", str_encode);
-
-    XmlDecode(str_encode);
-    printf("decode: %s\n", str_encode);
-    free(str_encode);
-
-    return 0;
+    return encode_str;
 }
 
-int CountSpecialCharacters(char *str){
+static int count_special_characters(const char *str) {
     int special_chars_count = 0;
-    for(int i = 0; str[i] != '\0'; i++){
-        for(int j = 0; j < XML_SPECIAL_CHARS_NUM; j++){
-            if(str[i] == xml_special_chars[j]){
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        for (int j = 0; j < XML_SPECIAL_CHARS_NUM; j++) {
+            if (str[i] == xml_special_chars[j]) {
                 special_chars_count++;
             }
         }
@@ -66,42 +73,10 @@ int CountSpecialCharacters(char *str){
     return special_chars_count;
 }
 
-char *XmlEncode(char *str){
-    int special_chars_count = CountSpecialCharacters(str);
-    int max_encode_len = strlen(str) + special_chars_count * MAX_XML_ENTITY_LEN;
-    char *encode_str = calloc(max_encode_len, sizeof(char));
-    int encode_index = 0;
-
-    if(encode_str == NULL){
-        perror("XmlEncode calloc()");
-        return NULL;
-    }
-
-    for(int i = 0; str[i] != '\0'; i++){
-        bool no_encode = true;
-
-        for(int j = 0; j < XML_SPECIAL_CHARS_NUM; j++){
-            if(str[i] == xml_special_chars[j]){
-                no_encode = false;
-                
-                int special_chars_len = strlen(xml_encode_entities[j]);
-                for(int k = 0; k < special_chars_len; k++){
-                    encode_str[encode_index ++] = xml_encode_entities[j][k];
-                }
-                break;
-            }
-        }
-        if(no_encode){
-            encode_str[encode_index ++] = str[i];
-        }
-    }
-    return encode_str;
-}
-
-void XmlDecode(char *str){    
-    for(int i = 0; str[i] != '\0'; i++){
-        for(int j = 0; j < XML_SPECIAL_CHARS_NUM; j++){
-            if(!strncmp(str + i, xml_encode_entities[j], strlen(xml_encode_entities[j]))){
+void xml_decode(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        for (int j = 0; j < XML_SPECIAL_CHARS_NUM; j++) {
+            if (strncmp(str + i, xml_encode_entities[j], strlen(xml_encode_entities[j])) == 0) {
                 str[i] = xml_special_chars[j];
 
                 int move_len = strlen(xml_encode_entities[j]);
