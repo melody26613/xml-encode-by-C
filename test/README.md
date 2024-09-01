@@ -10,13 +10,15 @@
         
         cd googletest
         
+        sudo apt install g++
+
         cmake -DCMAKE_CXX_FLAGS=-std=c++11 -Dgtest_build_samples=ON
         
         make -j4
 
     output library is lib/libgtest.a
 
-    header files at googletest/include/
+    header files at googletest/googletest/include/
 
 2. compile test sample
 
